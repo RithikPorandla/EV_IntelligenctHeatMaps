@@ -2,12 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Leaflet CSS - required for maps */
-@import 'leaflet/dist/leaflet.css';
-
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 255, 255, 255;
+  --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
 }
 
@@ -21,28 +18,8 @@ body {
     rgb(var(--background-start-rgb));
 }
 
-/* Map container styles */
 .leaflet-container {
-  height: 100%;
-  width: 100%;
-  z-index: 0;
-}
-
-/* Custom scrollbar */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #888;
-  border-radius: 4px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #555;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
 }

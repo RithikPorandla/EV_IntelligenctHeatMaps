@@ -1,198 +1,75 @@
-'use client'
-
-/**
- * Detailed site information panel
- */
-import { useEffect, useState } from 'react'
-import type { Site } from '@/types'
-import { getSite } from '@/lib/api'
-import { getScoreColor } from '@/lib/colors'
-import { formatNumber } from '@/lib/utils'
+import { Site } from "@/types";
+import { X } from "lucide-react";
 
 interface SiteDetailPanelProps {
-  siteId: number | null
-  onClose: () => void
+  site: Site | null;
+  onClose: () => void;
 }
 
-export default function SiteDetailPanel({ siteId, onClose }: SiteDetailPanelProps) {
-  const [site, setSite] = useState<Site | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (siteId === null) {
-      setSite(null)
-      return
-    }
-
-    setLoading(true)
-    setError(null)
-
-    getSite(siteId)
-      .then((data) => {
-        setSite(data)
-        setLoading(false)
-      })
-      .catch((err) => {
-        setError('Failed to load site details')
-        setLoading(false)
-        console.error(err)
-      })
-  }, [siteId])
-
-  if (siteId === null) return null
+export default function SiteDetailPanel({ site, onClose }: SiteDetailPanelProps) {
+  if (!site) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-96 bg-white shadow-2xl z-50 overflow-y-auto custom-scrollbar">
-      {/* Header */}
-      <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-900">Site Details</h2>
-        <button
-          onClick={onClose}
-          className="text-gray-600 hover:text-gray-900 text-xl"
-          aria-label="Close panel"
-        >
-          ×
+    <div className="absolute top-4 right-4 z-[1000] w-96 bg-white shadow-xl rounded-lg overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+        <h2 className="font-bold text-lg text-gray-800">Site Details</h2>
+        <button onClick={onClose} className="p-1 hover:bg-gray-200 rounded-full">
+            <X size={20} />
         </button>
       </div>
+      
+      <div className="p-6 overflow-y-auto space-y-6">
+        <div>
+            <div className="text-sm text-gray-500 mb-1">Parcel ID / Address</div>
+            <div className="font-medium">{site.parcel_id || "N/A"}</div>
+            <div className="text-gray-600">{site.address || "Unknown Address"}</div>
+        </div>
 
-      {/* Content */}
-      <div className="p-4">
-        {loading && (
-          <div className="text-center py-8">
-            <div className="text-gray-600">Loading...</div>
-          </div>
-        )}
-
-        {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-
-        {site && (
-          <div className="space-y-6">
-            {/* Location */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">Location</h3>
-              <p className="text-lg font-medium text-gray-900 mb-1">
-                {site.location_label || `Site ${site.id}`}
-              </p>
-              <p className="text-sm text-gray-600">
-                {site.lat.toFixed(4)}, {site.lng.toFixed(4)}
-              </p>
-              {site.parcel_id && (
-                <p className="text-xs text-gray-500 mt-1">Parcel ID: {site.parcel_id}</p>
-              )}
+        <div>
+            <div className="text-sm text-gray-500 mb-2">Scores (0-100)</div>
+            <div className="space-y-3">
+                <ScoreRow label="Overall Fit" value={site.score_overall} isMain />
+                <ScoreRow label="Demand Potential" value={site.score_demand} />
+                <ScoreRow label="Equity Priority" value={site.score_equity} />
+                <ScoreRow label="Traffic" value={site.score_traffic} />
+                <ScoreRow label="Grid Feasibility" value={site.score_grid} />
             </div>
+        </div>
 
-            {/* Scores */}
-            <div>
-              <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">
-                Opportunity Scores
-              </h3>
-              <div className="space-y-3">
-                {Object.entries(site.scores).map(([key, value]) => (
-                  <div key={key}>
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-sm font-medium text-gray-700 capitalize">
-                        {key}
-                      </span>
-                      <span
-                        className="text-lg font-bold"
-                        style={{ color: getScoreColor(value) }}
-                      >
-                        {value.toFixed(1)}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div
-                        className="h-2 rounded-full transition-all"
-                        style={{
-                          width: `${value}%`,
-                          backgroundColor: getScoreColor(value),
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
+        <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+            <h4 className="font-semibold text-blue-900 mb-1">Projected Usage</h4>
+            <div className="text-2xl font-bold text-blue-700">
+                {site.daily_kwh_estimate} <span className="text-sm font-normal text-blue-600">kWh / day</span>
             </div>
+            <p className="text-xs text-blue-600 mt-2">
+                Based on nearby traffic & density models.
+            </p>
+        </div>
 
-            {/* Demand Estimate */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-blue-900 mb-2">
-                Estimated Charging Demand
-              </h3>
-              <p className="text-3xl font-bold text-blue-700">
-                {formatNumber(site.daily_kwh_estimate, 0)}
-                <span className="text-lg font-normal text-blue-600 ml-2">kWh/day</span>
-              </p>
-              <p className="text-xs text-blue-700 mt-1">
-                Based on traffic, population, and local activity patterns
-              </p>
-            </div>
-
-            {/* Features (if available) */}
-            {site.features && (
-              <div>
-                <h3 className="text-sm font-semibold text-gray-500 uppercase mb-3">
-                  Site Features
-                </h3>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div>
-                    <p className="text-gray-600">Traffic Index</p>
-                    <p className="font-semibold">{site.features.traffic_index.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Pop. Density</p>
-                    <p className="font-semibold">{site.features.pop_density_index.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Renters Share</p>
-                    <p className="font-semibold">{(site.features.renters_share * 100).toFixed(0)}%</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Income Index</p>
-                    <p className="font-semibold">{site.features.income_index.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">POI Index</p>
-                    <p className="font-semibold">{site.features.poi_index.toFixed(2)}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Parking Lot</p>
-                    <p className="font-semibold">
-                      {site.features.parking_lot_flag ? '✓ Yes' : '✗ No'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Incentives Info */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <h3 className="text-sm font-semibold text-green-900 mb-2">
-                MA EV Charging Incentives
-              </h3>
-              <ul className="text-xs text-green-800 space-y-1">
-                <li>• MassEVIP: Up to $50k-$100k per site</li>
-                <li>• MOR-EV: Vehicle rebates increase demand</li>
-                <li>• Federal NEVI funding available</li>
-                <li>• Priority for environmental justice areas</li>
-              </ul>
-              <a
-                href="https://goclean.masscec.com/ev-rebates-and-incentives/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-green-700 hover:underline mt-2 inline-block"
-              >
-                Learn more →
-              </a>
-            </div>
-          </div>
-        )}
+        <div>
+            <h4 className="font-semibold text-gray-900 mb-2">Incentives</h4>
+            <ul className="text-sm space-y-2 text-gray-600 list-disc pl-4">
+                <li><a href="https://mor-ev.org" target="_blank" className="text-blue-600 hover:underline">MOR-EV Rebates</a> available.</li>
+                <li>Qualifies for MassEVIP Workplace Charging? <span className="italic text-gray-400">(Check eligibility)</span></li>
+            </ul>
+        </div>
       </div>
     </div>
-  )
+  );
+}
+
+function ScoreRow({ label, value, isMain = false }: { label: string, value: number, isMain?: boolean }) {
+    const barColor = value >= 60 ? "bg-green-500" : value >= 40 ? "bg-yellow-500" : "bg-red-500";
+    
+    return (
+        <div className="flex items-center justify-between">
+            <span className={isMain ? "font-bold text-gray-900" : "text-gray-600"}>{label}</span>
+            <div className="flex items-center gap-2 w-32">
+                <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                    <div className={`h-full ${barColor}`} style={{ width: `${value}%` }} />
+                </div>
+                <span className={`text-sm w-8 text-right ${isMain ? "font-bold" : ""}`}>{value}</span>
+            </div>
+        </div>
+    )
 }
