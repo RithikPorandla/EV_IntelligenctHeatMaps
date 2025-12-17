@@ -1,1 +1,1 @@
-# EV_IntelligenctHeatMaps
+# EV_IntelligentHeatMaps
