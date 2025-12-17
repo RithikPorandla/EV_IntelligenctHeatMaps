@@ -1,0 +1,18 @@
+{
+  "state": "MA",
+  "programs": [
+    {
+      "name": "MOR-EV (Mass Offers Rebates for Electric Vehicles)",
+      "type": "consumer rebate",
+      "source": "https://www.mass.gov/info-details/mor-ev-rebate-program",
+      "note": "Rebates for eligible new/used EVs (amounts depend on vehicle and income eligibility)."
+    },
+    {
+      "name": "MassCEC EV Resources",
+      "type": "public/workplace charging support",
+      "source": "https://goclean.masscec.com/ev-rebates-and-incentives/",
+      "note": "Program info and guidance for public/workplace/fleet charging incentives and planning."
+    }
+  ],
+  "disclaimer": "Info-only summary for a personal portfolio project; verify current program details at official sources."
+}
