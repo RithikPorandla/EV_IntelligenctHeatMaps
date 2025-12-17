@@ -1,0 +1,68 @@
+{
+  "title": "Massachusetts EV Charging Incentives",
+  "description": "Key incentive programs for EV charging infrastructure in Massachusetts",
+  "last_updated": "2024-12",
+  "programs": [
+    {
+      "name": "MOR-EV Rebate Program",
+      "type": "Vehicle Purchase Rebate",
+      "administrator": "Massachusetts Department of Energy Resources",
+      "url": "https://mor-ev.org",
+      "description": "Rebates for new or used battery electric vehicles (BEVs) and plug-in hybrid electric vehicles (PHEVs)",
+      "rebate_amounts": {
+        "BEV": "$3,500 - $7,500",
+        "PHEV": "$1,500 - $4,500",
+        "income_qualified_bonus": "Up to $3,500 additional"
+      },
+      "relevance_to_charging": "More EVs on the road = more charging demand"
+    },
+    {
+      "name": "MassEVIP (Mass Electric Vehicle Incentive Program)",
+      "type": "Charging Infrastructure",
+      "administrator": "MassCEC (Massachusetts Clean Energy Center)",
+      "url": "https://goclean.masscec.com/ev-rebates-and-incentives/",
+      "description": "Rebates for public, workplace, and multi-unit dwelling EV charging stations",
+      "rebate_amounts": {
+        "level_2_charger": "Up to $50,000 per site",
+        "dc_fast_charger": "Up to $100,000 per site"
+      },
+      "eligibility": [
+        "Municipal governments",
+        "Public agencies",
+        "Workplaces",
+        "Multi-unit dwellings",
+        "Public parking facilities"
+      ],
+      "relevance_to_charging": "Direct funding for charger installation"
+    },
+    {
+      "name": "Volkswagen Environmental Mitigation Trust",
+      "type": "Charging Infrastructure",
+      "administrator": "Massachusetts DEP",
+      "description": "Funding for DC fast charging infrastructure along corridors and in communities",
+      "focus_areas": [
+        "Highway corridors",
+        "Environmental justice communities",
+        "Multi-unit dwellings"
+      ]
+    },
+    {
+      "name": "Federal NEVI Program",
+      "type": "Charging Infrastructure",
+      "administrator": "US DOT / MassDOT",
+      "description": "National Electric Vehicle Infrastructure Formula Program",
+      "focus": "Build out fast charging along designated Alternative Fuel Corridors",
+      "relevance_to_charging": "Federal support for high-traffic corridor locations"
+    }
+  ],
+  "equity_considerations": [
+    "Income-qualified bonuses available for MOR-EV",
+    "Environmental justice community priority in state programs",
+    "Multi-unit dwelling (renter) access programs"
+  ],
+  "sources": [
+    "https://www.mass.gov/info-details/mor-ev-rebate-program",
+    "https://goclean.masscec.com/ev-rebates-and-incentives/",
+    "https://www.mass.gov/info-details/massachusetts-clean-energy-and-climate-metrics"
+  ]
+}

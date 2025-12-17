@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: ma-evcharge-db
+    environment:
+      POSTGRES_USER: evcharge
+      POSTGRES_PASSWORD: evcharge123
+      POSTGRES_DB: evcharge
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U evcharge"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - evcharge-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ma-evcharge-backend
+    environment:
+      DATABASE_URL: postgresql://evcharge:evcharge123@db:5432/evcharge
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+      DEBUG: "true"
+      CORS_ORIGINS: "http://localhost:3000,http://frontend:3000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app
+      - ./models:/app/models
+    networks:
+      - evcharge-network
+    command: python -m app.main
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ma-evcharge-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - evcharge-network
+
+volumes:
+  postgres_data:
+
+networks:
+  evcharge-network:
+    driver: bridge
