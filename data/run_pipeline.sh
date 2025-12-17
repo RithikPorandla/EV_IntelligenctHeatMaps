@@ -3,12 +3,13 @@
 # MA EV ChargeMap - Data Pipeline Runner
 # 
 # This script runs the complete data pipeline to generate Worcester EV charging
-# site data from scratch.
+# site data from real or synthetic sources.
 #
 # Steps:
-# 1. Generate candidate site locations (grid)
-# 2. Add demographic features
-# 3. Add traffic features  
+# 0. (Optional) Fetch real data from OpenStreetMap & Census
+# 1. Load candidate site locations (OSM buildings or grid)
+# 2. Add demographic features (Census + OSM POIs or synthetic)
+# 3. Add traffic features (OSM roads or synthetic)
 # 4. Compute final scores
 
 set -e  # Exit on error
@@ -30,8 +31,33 @@ fi
 echo "Activating Python environment..."
 source ../backend/venv/bin/activate
 
+# Check for real data
 echo ""
-echo "Step 1/4: Generating candidate site locations..."
+echo "Checking for real data sources..."
+if [ -f "raw/worcester_buildings_osm.csv" ]; then
+    echo "  ✓ Found real OSM building data"
+    USE_REAL=true
+else
+    echo "  ℹ No real data found - will use synthetic data"
+    echo "  ℹ To download real data, run: python fetch_real_data.py"
+    USE_REAL=false
+fi
+
+# Offer to fetch real data if not present
+if [ "$USE_REAL" = false ]; then
+    echo ""
+    echo "Would you like to download real data now? (y/n)"
+    read -t 10 -n 1 response || response='n'
+    echo ""
+    if [[ "$response" =~ ^[Yy]$ ]]; then
+        echo "Fetching real data from OpenStreetMap and Census..."
+        python fetch_real_data.py
+        USE_REAL=true
+    fi
+fi
+
+echo ""
+echo "Step 1/4: Loading candidate site locations..."
 echo "----------------------------------------"
 python ingest_parcels.py
 
@@ -55,7 +81,17 @@ echo "=========================================="
 echo "✓ Pipeline complete!"
 echo "=========================================="
 echo ""
+if [ "$USE_REAL" = true ]; then
+    echo "📊 Used REAL data from:"
+    echo "  - OpenStreetMap (buildings, POIs, roads)"
+    echo "  - US Census Bureau (demographics)"
+else
+    echo "📊 Used SYNTHETIC data for demonstration"
+    echo "  ℹ Run 'python fetch_real_data.py' to use real data"
+fi
+echo ""
 echo "You can now:"
 echo "  - Start the API: cd ../backend && python -m app.main"
 echo "  - View data in notebooks: cd ../notebooks"
+echo "  - View data docs: cat README_REAL_DATA.md"
 echo ""

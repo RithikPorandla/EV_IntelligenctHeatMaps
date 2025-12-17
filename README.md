@@ -37,12 +37,17 @@ The system predicts expected daily charging demand (kWh) using a trained ML mode
 
 ## 🚀 Quick Start
 
-### With Docker (Recommended)
+### With Docker + Real Data (Recommended)
 
 ```bash
 # Clone the repository
 git clone <your-repo-url>
 cd ma-ev-chargemap
+
+# Download real data (optional but recommended)
+cd data
+python fetch_real_data.py  # 2-5 minutes, downloads from OSM & Census
+cd ..
 
 # Run setup script
 chmod +x infra/dev-setup.sh
@@ -53,6 +58,8 @@ chmod +x infra/dev-setup.sh
 # API: http://localhost:8000
 # API Docs: http://localhost:8000/docs
 ```
+
+**See** [REAL_DATA_QUICKSTART.md](REAL_DATA_QUICKSTART.md) for detailed real data guide.
 
 ### Without Docker
 
@@ -80,8 +87,9 @@ cp .env.example .env
 # Initialize database
 python -c "from app.database import init_db; init_db()"
 
-# Run data pipeline
+# Run data pipeline (with optional real data)
 cd ../data
+python fetch_real_data.py  # Optional: Download real OSM & Census data
 ./run_pipeline.sh
 
 # Start API
@@ -213,10 +221,11 @@ ML Pipeline (Jupyter notebooks)
 - Fallback to heuristic if model unavailable
 
 ### Data Pipeline
+- **Real data integration**: OpenStreetMap + US Census Bureau
 - Modular Python scripts for each data source
-- Reproducible transformations
+- Reproducible transformations with automatic fallback
 - Clear separation of raw → processed data
-- Synthetic data generation for portfolio demonstration
+- Works with real OR synthetic data
 
 ---
 
@@ -251,14 +260,30 @@ See [docs/SCORING_MODEL.md](docs/SCORING_MODEL.md) for detailed methodology.
 
 ## 🗄️ Data Sources
 
-This project references real Massachusetts open data sources:
+### ✨ Now with Real Open Data Integration!
 
-- **MassGIS Property Tax Parcels**: Candidate site locations
-- **MAPC DataCommon**: Demographics and equity data
-- **MassDOT Traffic Inventory**: Traffic counts and patterns
-- **Mass.gov Open Data**: Environmental justice, energy metrics
+The project can use **real, publicly available datasets**:
 
-For this portfolio version, synthetic data is generated to simulate these sources. See [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) for details.
+**Currently Integrated** (no authentication required):
+- **OpenStreetMap**: Buildings, POIs, road network via Overpass API
+- **US Census Bureau**: Demographics, income, housing data via public API
+
+**Referenced for Enhancement**:
+- **MassGIS Property Tax Parcels**: Detailed parcel data
+- **MAPC DataCommon**: Regional demographics
+- **MassDOT Traffic Inventory**: Actual traffic counts
+
+### Getting Real Data
+
+```bash
+cd data
+python fetch_real_data.py  # Downloads from OSM & Census (~5 min)
+./run_pipeline.sh           # Automatically uses real data if available
+```
+
+**Fallback**: If real data unavailable, automatically uses synthetic data for demonstration.
+
+See [data/README_REAL_DATA.md](data/README_REAL_DATA.md) for details.
 
 ---
 
@@ -341,18 +366,19 @@ See [docs/API.md](docs/API.md) for full API reference.
 ## 🚧 Limitations & Future Work
 
 ### Current Limitations
-1. **Synthetic Data**: Uses generated data for demonstration. In production, would integrate real datasets.
+1. **Data Coverage**: Uses OSM and Census (good coverage). Could enhance with MassDOT traffic counts and MAPC detailed layers.
 2. **Single City**: Pilot focuses on Worcester. Framework supports expansion to other MA cities.
 3. **Static Model**: ML model trained once. Production would include retraining pipeline.
-4. **Simplified Grid Score**: Placeholder logic. Could integrate actual utility infrastructure data.
+4. **Simplified Grid Score**: Uses road proximity. Could integrate actual utility infrastructure data.
 
 ### Future Enhancements
-1. **Real Data Integration**: Automated ingestion from MA open data APIs
+1. **Enhanced Data**: MassDOT actual traffic counts, MAPC detailed demographics
 2. **Temporal Predictions**: Time-of-day and seasonal demand forecasting
 3. **Route Planning**: Optimal charger network topology
 4. **Cost Analysis**: ROI calculator with utility rates and incentives
 5. **User Accounts**: Save analyses, compare scenarios
 6. **Mobile App**: Native mobile interface
+7. **More Cities**: Expand to Boston, Cambridge, Springfield, etc.
 
 ---
 
