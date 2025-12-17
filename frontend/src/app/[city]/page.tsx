@@ -34,6 +34,8 @@ export default function CityPage() {
   // Filters
   const [scoreType, setScoreType] = useState<ScoreType>('overall')
   const [minScore, setMinScore] = useState(0)
+  const [parkingOnly, setParkingOnly] = useState(false)
+  const [municipalOnly, setMunicipalOnly] = useState(false)
 
   // Selected site for detail panel
   const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null)
@@ -67,7 +69,14 @@ export default function CityPage() {
   // Filter sites by min score
   const filteredFeatures = sitesData
     ? sitesData.features.filter(
-        (f) => f.properties.score_overall >= minScore
+        (f) => {
+          const passesScore = f.properties.score_overall >= minScore
+          const isParking = (f.properties.parking_lot_flag ?? 0) === 1
+          const isMunicipal = (f.properties.municipal_parcel_flag ?? 0) === 1
+          const passesParking = !parkingOnly || isParking
+          const passesMunicipal = !municipalOnly || isMunicipal
+          return passesScore && passesParking && passesMunicipal
+        }
       )
     : []
 
@@ -75,7 +84,9 @@ export default function CityPage() {
     return (
       <div className="h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="text-xl font-semibold text-gray-700">Loading Worcester data...</div>
+          <div className="text-xl font-semibold text-gray-700">
+            Loading {citySlug} data...
+          </div>
           <div className="text-sm text-gray-500 mt-2">This may take a moment</div>
         </div>
       </div>
@@ -136,8 +147,12 @@ export default function CityPage() {
           features={filteredFeatures}
           scoreType={scoreType}
           minScore={minScore}
+          parkingOnly={parkingOnly}
+          municipalOnly={municipalOnly}
           onScoreTypeChange={setScoreType}
           onMinScoreChange={setMinScore}
+          onParkingOnlyChange={setParkingOnly}
+          onMunicipalOnlyChange={setMunicipalOnly}
           onSiteClick={setSelectedSiteId}
         />
 

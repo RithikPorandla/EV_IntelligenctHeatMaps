@@ -12,8 +12,12 @@ interface SidebarProps {
   features: GeoJSONFeature[]
   scoreType: ScoreType
   minScore: number
+  parkingOnly: boolean
+  municipalOnly: boolean
   onScoreTypeChange: (type: ScoreType) => void
   onMinScoreChange: (score: number) => void
+  onParkingOnlyChange: (value: boolean) => void
+  onMunicipalOnlyChange: (value: boolean) => void
   onSiteClick?: (siteId: number) => void
 }
 
@@ -21,8 +25,12 @@ export default function Sidebar({
   features,
   scoreType,
   minScore,
+  parkingOnly,
+  municipalOnly,
   onScoreTypeChange,
   onMinScoreChange,
+  onParkingOnlyChange,
+  onMunicipalOnlyChange,
   onSiteClick,
 }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false)
@@ -30,7 +38,9 @@ export default function Sidebar({
   // Get top 10 sites by selected score type
   const sortedFeatures = [...features].sort((a, b) => {
     const scoreKey = `score_${scoreType}` as keyof typeof a.properties
-    return (b.properties[scoreKey] as number) - (a.properties[scoreKey] as number)
+    const bScore = Number(b.properties[scoreKey] ?? 0)
+    const aScore = Number(a.properties[scoreKey] ?? 0)
+    return bScore - aScore
   })
   const topSites = sortedFeatures.slice(0, 10)
 
@@ -75,6 +85,7 @@ export default function Sidebar({
                 <option value="demand">Demand Score</option>
                 <option value="equity">Equity Score</option>
                 <option value="traffic">Traffic Score</option>
+                <option value="amenities">Amenities (POI) Score</option>
                 <option value="grid">Grid Score</option>
               </select>
             </div>
@@ -98,6 +109,36 @@ export default function Sidebar({
                 <span>50</span>
                 <span>100</span>
               </div>
+            </div>
+
+            {/* Parcel / siting filters */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Site Filters
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={parkingOnly}
+                    onChange={(e) => onParkingOnlyChange(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  Only parking lots
+                </label>
+                <label className="flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={municipalOnly}
+                    onChange={(e) => onMunicipalOnlyChange(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  Only municipal parcels
+                </label>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Filters use parcel/amenity flags when available.
+              </p>
             </div>
           </div>
 
@@ -130,7 +171,7 @@ export default function Sidebar({
                 {topSites.map((feature, index) => {
                   const { properties } = feature
                   const scoreKey = `score_${scoreType}` as keyof typeof properties
-                  const score = properties[scoreKey] as number
+                  const score = Number(properties[scoreKey] ?? 0)
 
                   return (
                     <div

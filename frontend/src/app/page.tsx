@@ -94,9 +94,14 @@ export default function Home() {
               View on GitHub
             </a>
             {' • '}
-            <Link href="/api/docs" className="text-blue-600 hover:underline">
+            <a
+              href="http://localhost:8000/docs"
+              className="text-blue-600 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
               API Documentation
-            </Link>
+            </a>
           </p>
         </footer>
       </div>

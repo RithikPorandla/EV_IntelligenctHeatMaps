@@ -80,6 +80,7 @@ class Site(Base):
     
     def to_geojson_feature(self):
         """Convert site to GeoJSON feature for map visualization."""
+        score_amenities = round(self.poi_index * 100.0, 1)
         return {
             "type": "Feature",
             "geometry": {
@@ -95,6 +96,9 @@ class Site(Base):
                 "score_equity": round(self.score_equity, 1),
                 "score_traffic": round(self.score_traffic, 1),
                 "score_grid": round(self.score_grid, 1),
+                "score_amenities": score_amenities,
                 "daily_kwh_estimate": round(self.daily_kwh_estimate, 1),
+                "parking_lot_flag": self.parking_lot_flag,
+                "municipal_parcel_flag": self.municipal_parcel_flag,
             }
         }

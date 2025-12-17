@@ -167,6 +167,7 @@ GET /api/sites?city=worcester&min_score=60&limit=100
         "score_equity": 68.9,
         "score_traffic": 71.5,
         "score_grid": 65.0,
+        "score_amenities": 68.0,
         "daily_kwh_estimate": 285.5
       }
     }
@@ -182,7 +183,7 @@ GET /api/sites?city=worcester&min_score=60&limit=100
 
 ---
 
-#### `GET /api/sites/{site_id}`
+#### `GET /api/site/{site_id}`
 
 Get detailed information for a single site.
 
@@ -191,7 +192,7 @@ Get detailed information for a single site.
 
 **Example**:
 ```
-GET /api/sites/123
+GET /api/site/123
 ```
 
 **Response**:
@@ -228,6 +229,27 @@ GET /api/sites/123
 - `404`: Site not found
 
 ---
+
+### Incentives
+
+#### `GET /api/incentives`
+
+Returns a small, human-readable incentives config used by the frontend info panel.
+
+**Response**:
+```json
+{
+  "title": "Massachusetts EV Charging Incentives",
+  "last_updated": "2024-12",
+  "programs": [
+    {
+      "name": "MassEVIP (Mass Electric Vehicle Incentive Program)",
+      "type": "Charging Infrastructure",
+      "url": "https://goclean.masscec.com/ev-rebates-and-incentives/"
+    }
+  ]
+}
+```
 
 ### Predictions
 

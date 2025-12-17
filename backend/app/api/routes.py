@@ -1,6 +1,8 @@
 """
 API route handlers for MA EV ChargeMap.
 """
+import json
+from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
@@ -27,6 +29,17 @@ CITIES = {
         "center": [42.2626, -71.8023]  # [lat, lng]
     }
 }
+
+# Incentives config (static JSON for v1)
+INCENTIVES_PATH = Path(__file__).resolve().parents[2] / "config" / "incentives.json"
+try:
+    INCENTIVES_CONFIG = json.loads(INCENTIVES_PATH.read_text())
+except Exception:
+    INCENTIVES_CONFIG = {
+        "title": "Massachusetts EV Charging Incentives",
+        "description": "Incentives config file missing or unreadable",
+        "programs": [],
+    }
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -59,6 +72,16 @@ def get_cities():
     Currently supports Worcester, MA as pilot city.
     """
     return [CityInfo(**city) for city in CITIES.values()]
+
+
+@router.get("/incentives")
+def get_incentives():
+    """
+    Get Massachusetts EV incentive context (human-readable).
+
+    Used by the frontend site detail panel to provide program guidance.
+    """
+    return INCENTIVES_CONFIG
 
 
 @router.get("/cities/{city_slug}", response_model=CityInfo)
@@ -151,6 +174,17 @@ def get_site(site_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail=f"Site {site_id} not found")
     
     return SiteDetail(**site.to_dict())
+
+
+@router.get("/site/{site_id}", response_model=SiteDetail)
+def get_site_compat(site_id: int, db: Session = Depends(get_db)):
+    """
+    Compatibility alias for the v1 spec:
+    `GET /api/site/{id}`.
+
+    The canonical endpoint in this codebase is `GET /api/sites/{id}`.
+    """
+    return get_site(site_id=site_id, db=db)
 
 
 @router.post("/predict", response_model=PredictionResponse)

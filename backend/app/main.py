@@ -10,8 +10,9 @@ This is a personal portfolio project demonstrating:
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
-from app.database import init_db
+from app.database import init_db, SessionLocal
 from app.api.routes import router
+from app.services.demo_data import seed_worcester_if_empty
 
 # Create FastAPI application
 app = FastAPI(
@@ -53,6 +54,20 @@ async def startup_event():
     except Exception as e:
         print(f"⚠ Database initialization warning: {e}")
 
+    # Seed demo data (so docker-compose up is end-to-end)
+    try:
+        db = SessionLocal()
+        inserted = seed_worcester_if_empty(db)
+        if inserted:
+            print(f"✓ Seeded {inserted} Worcester demo sites")
+    except Exception as e:
+        print(f"⚠ Demo data seeding warning: {e}")
+    finally:
+        try:
+            db.close()
+        except Exception:
+            pass
+
 
 @app.get("/")
 def root():
@@ -67,7 +82,9 @@ def root():
         "api_endpoints": {
             "cities": "/api/cities",
             "sites": "/api/sites?city=worcester",
+            "site_detail": "/api/site/{id}",
             "predict": "/api/predict",
+            "incentives": "/api/incentives",
             "health": "/api/health",
         },
         "portfolio_note": (

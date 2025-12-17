@@ -55,7 +55,10 @@ export interface GeoJSONFeature {
     score_equity: number
     score_traffic: number
     score_grid: number
+    score_amenities?: number
     daily_kwh_estimate: number
+    parking_lot_flag?: number
+    municipal_parcel_flag?: number
   }
 }
 
@@ -65,7 +68,7 @@ export interface SitesResponse {
   count: number
 }
 
-export type ScoreType = 'overall' | 'demand' | 'equity' | 'traffic' | 'grid'
+export type ScoreType = 'overall' | 'demand' | 'equity' | 'traffic' | 'grid' | 'amenities'
 
 export interface MapFilters {
   scoreType: ScoreType

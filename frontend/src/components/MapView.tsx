@@ -5,10 +5,12 @@
  */
 import { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet'
+import L from 'leaflet'
 import type { GeoJSONFeature, ScoreType } from '@/types'
 import { getScoreColor, scoreToIntensity } from '@/lib/colors'
 import { formatNumber } from '@/lib/utils'
 import 'leaflet/dist/leaflet.css'
+import 'leaflet.heat'
 
 interface MapViewProps {
   features: GeoJSONFeature[]
@@ -27,6 +29,46 @@ function MapUpdater({ center }: { center: [number, number] }) {
     map.setView(center, map.getZoom())
   }, [center, map])
   
+  return null
+}
+
+/**
+ * Heatmap overlay using Leaflet.heat
+ */
+function HeatmapLayer({
+  features,
+  scoreType,
+}: {
+  features: GeoJSONFeature[]
+  scoreType: ScoreType
+}) {
+  const map = useMap()
+
+  useEffect(() => {
+    if (!map) return
+
+    // Build heat points: [lat, lng, intensity]
+    const points: [number, number, number][] = features.map((f) => {
+      const [lng, lat] = f.geometry.coordinates
+      const scoreKey = `score_${scoreType}` as keyof typeof f.properties
+      const score = (f.properties[scoreKey] as number) ?? 0
+      return [lat, lng, scoreToIntensity(score)]
+    })
+
+    // Leaflet.heat layer (runtime plugin)
+    const layer = (L as any).heatLayer(points, {
+      radius: 24,
+      blur: 18,
+      maxZoom: 16,
+      minOpacity: 0.25,
+    })
+
+    layer.addTo(map)
+    return () => {
+      map.removeLayer(layer)
+    }
+  }, [map, features, scoreType])
+
   return null
 }
 
@@ -61,6 +103,9 @@ export default function MapView({ features, center, scoreType, onSiteClick }: Ma
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
+      {/* Heatmap overlay */}
+      <HeatmapLayer features={features} scoreType={scoreType} />
+
       {/* Site markers */}
       {features.map((feature) => {
         const { properties, geometry } = feature
@@ -68,7 +113,7 @@ export default function MapView({ features, center, scoreType, onSiteClick }: Ma
         
         // Get score based on selected type
         const scoreKey = `score_${scoreType}` as keyof typeof properties
-        const score = properties[scoreKey] as number
+        const score = (properties[scoreKey] as number | undefined) ?? 0
         const color = getScoreColor(score)
         const radius = 5 + (score / 100) * 10 // Size based on score
 

@@ -5,7 +5,7 @@
  */
 import { useEffect, useState } from 'react'
 import type { Site } from '@/types'
-import { getSite } from '@/lib/api'
+import { getIncentives, getSite } from '@/lib/api'
 import { getScoreColor } from '@/lib/colors'
 import { formatNumber } from '@/lib/utils'
 
@@ -18,6 +18,17 @@ export default function SiteDetailPanel({ siteId, onClose }: SiteDetailPanelProp
   const [site, setSite] = useState<Site | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [incentives, setIncentives] = useState<Awaited<ReturnType<typeof getIncentives>> | null>(null)
+
+  // Load incentives once
+  useEffect(() => {
+    getIncentives()
+      .then(setIncentives)
+      .catch(() => {
+        // Non-blocking for site details
+        setIncentives(null)
+      })
+  }, [])
 
   useEffect(() => {
     if (siteId === null) {
@@ -175,20 +186,46 @@ export default function SiteDetailPanel({ siteId, onClose }: SiteDetailPanelProp
               <h3 className="text-sm font-semibold text-green-900 mb-2">
                 MA EV Charging Incentives
               </h3>
-              <ul className="text-xs text-green-800 space-y-1">
-                <li>• MassEVIP: Up to $50k-$100k per site</li>
-                <li>• MOR-EV: Vehicle rebates increase demand</li>
-                <li>• Federal NEVI funding available</li>
-                <li>• Priority for environmental justice areas</li>
-              </ul>
-              <a
-                href="https://goclean.masscec.com/ev-rebates-and-incentives/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-green-700 hover:underline mt-2 inline-block"
-              >
-                Learn more →
-              </a>
+              {incentives ? (
+                <>
+                  <ul className="text-xs text-green-800 space-y-2">
+                    {incentives.programs.slice(0, 4).map((p) => (
+                      <li key={p.name}>
+                        <p className="font-semibold">{p.name}</p>
+                        {(p.description || p.relevance_to_charging) && (
+                          <p className="text-green-800/90">
+                            {p.relevance_to_charging || p.description}
+                          </p>
+                        )}
+                        {p.url && (
+                          <a
+                            href={p.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-green-700 hover:underline"
+                          >
+                            Learn more →
+                          </a>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                  {Array.isArray(incentives.equity_considerations) && incentives.equity_considerations.length > 0 && (
+                    <div className="mt-3">
+                      <p className="text-xs font-semibold text-green-900">Equity notes</p>
+                      <ul className="text-xs text-green-800 list-disc list-inside space-y-1 mt-1">
+                        {incentives.equity_considerations.slice(0, 3).map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-xs text-green-800">
+                  Incentives info is unavailable right now.
+                </p>
+              )}
             </div>
           </div>
         )}

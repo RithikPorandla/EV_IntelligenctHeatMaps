@@ -2,7 +2,7 @@
 Pydantic schemas for API request/response validation.
 """
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict
+from typing import List, Optional, Dict, Any
 
 
 class CityInfo(BaseModel):
@@ -73,7 +73,7 @@ class PredictionResponse(BaseModel):
     """Response for ML prediction endpoint."""
     scores: SiteScores
     daily_kwh_estimate: float
-    model_info: Dict[str, any]
+    model_info: Dict[str, Any]
 
 
 class HealthResponse(BaseModel):

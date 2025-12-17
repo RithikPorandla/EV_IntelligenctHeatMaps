@@ -61,6 +61,8 @@ chmod +x infra/dev-setup.sh
 
 **See** [REAL_DATA_QUICKSTART.md](REAL_DATA_QUICKSTART.md) for detailed real data guide.
 
+**Note**: On first startup, the backend will auto-seed a Worcester demo dataset if the database is empty (so the map isn’t blank).
+
 ### Without Docker
 
 #### Prerequisites
@@ -326,8 +328,9 @@ The backend provides OpenAPI documentation:
 
 - `GET /api/cities` - List supported cities
 - `GET /api/sites?city=worcester` - Get all sites for a city
-- `GET /api/sites/{id}` - Get detailed site info
+- `GET /api/site/{id}` - Get detailed site info (alias: `/api/sites/{id}`)
 - `POST /api/predict` - Predict scores for hypothetical location
+- `GET /api/incentives` - Incentive context used by the info panel
 - `GET /api/stats/{city}` - Get city statistics
 
 See [docs/API.md](docs/API.md) for full API reference.
